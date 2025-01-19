@@ -47,3 +47,7 @@ To get started with this project, follow these steps:
 This project uses the following dependencies:
 - [video_player](https://pub.dev/packages/video_player)
 
+Live-streaming
+1. URL of the http must end with .m3u8
+2. test link [Live URL](https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8)
+

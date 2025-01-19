@@ -11,6 +11,7 @@ class ScreenThree extends StatefulWidget {
 class _ScreenThreeState extends State<ScreenThree> {
   late VideoPlayerController _controller;
   late VideoPlayerController _networkController;
+  late VideoPlayerController _liveController;
   double _playbackSpeed = 1.0;
 
   @override
@@ -25,6 +26,13 @@ class _ScreenThreeState extends State<ScreenThree> {
         'https://videos.pexels.com/video-files/855402/855402-uhd_2560_1440_25fps.mp4'))
       ..initialize().then((_) {
         setState(() {});
+      });
+
+    _liveController = VideoPlayerController.networkUrl(Uri.parse(
+        'https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8'))
+      ..initialize().then((_) {
+        setState(() {});
+        _liveController.play();
       });
   }
 
@@ -56,7 +64,8 @@ class _ScreenThreeState extends State<ScreenThree> {
         backgroundColor: const Color.fromARGB(255, 23, 23, 23),
       ),
       backgroundColor: Colors.black,
-      body: Column(
+      body: SingleChildScrollView(
+          child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
@@ -224,8 +233,63 @@ class _ScreenThreeState extends State<ScreenThree> {
                   ],
                 )
               : CircularProgressIndicator(),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: const Text(
+                "3. Live video player 🤯",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          _liveController.value.isInitialized
+              ? Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: _liveController.value.aspectRatio,
+                      child: VideoPlayer(_liveController),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          _liveController.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 50.0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _liveController.value.isPlaying
+                                ? _liveController.pause()
+                                : _liveController.play();
+                          });
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: ElevatedButton(
+                        onPressed: _changePlaybackSpeed,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child:
+                            Text('LIVE', style: TextStyle(color: Colors.white)),
+                      ),
+                    ),
+                  ],
+                )
+              : CircularProgressIndicator(),
         ],
-      ),
+      )),
     );
   }
 }
