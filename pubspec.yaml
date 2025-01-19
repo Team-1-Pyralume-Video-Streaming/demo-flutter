@@ -10,6 +10,7 @@ dependencies:
   video_player: ^2.9.0
   flutter:
     sdk: flutter
+  http:
 
 dev_dependencies:
   flutter_test:
@@ -17,4 +18,6 @@ dev_dependencies:
   flutter_lints: ^5.0.0
 
 flutter:
+  assets:
+    - assets/videos/cats.mp4
   uses-material-design: true

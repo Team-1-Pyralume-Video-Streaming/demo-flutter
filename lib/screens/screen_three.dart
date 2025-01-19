@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 class ScreenThree extends StatefulWidget {
@@ -11,6 +10,7 @@ class ScreenThree extends StatefulWidget {
 
 class _ScreenThreeState extends State<ScreenThree> {
   late VideoPlayerController _controller;
+  late VideoPlayerController _networkController;
   double _playbackSpeed = 1.0;
 
   @override
@@ -21,23 +21,11 @@ class _ScreenThreeState extends State<ScreenThree> {
         setState(() {});
       });
 
-    // 设置屏幕方向为横屏
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft,
-    ]);
-  }
-
-  @override
-  void dispose() {
-    // 恢复屏幕方向为竖屏
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
-
-    _controller.dispose();
-    super.dispose();
+    _networkController = VideoPlayerController.networkUrl(Uri.parse(
+        'https://videos.pexels.com/video-files/855402/855402-uhd_2560_1440_25fps.mp4'))
+      ..initialize().then((_) {
+        setState(() {});
+      });
   }
 
   void _changePlaybackSpeed() {
@@ -162,6 +150,80 @@ class _ScreenThreeState extends State<ScreenThree> {
               ),
             ),
           ),
+          _networkController.value.isInitialized
+              ? Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: _networkController.value.aspectRatio,
+                      child: VideoPlayer(_networkController),
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          _networkController.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                          size: 50.0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _networkController.value.isPlaying
+                                ? _networkController.pause()
+                                : _networkController.play();
+                          });
+                        },
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 10,
+                      left: 10,
+                      right: 10,
+                      child: Column(
+                        children: [
+                          VideoProgressIndicator(
+                            _networkController,
+                            allowScrubbing: true,
+                            colors: VideoProgressColors(
+                              playedColor: Colors.red,
+                              backgroundColor: Colors.grey,
+                              bufferedColor: Colors.white,
+                            ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _formatDuration(
+                                    _networkController.value.position),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                              Text(
+                                _formatDuration(
+                                    _networkController.value.duration),
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 10,
+                      right: 10,
+                      child: ElevatedButton(
+                        onPressed: _changePlaybackSpeed,
+                        child: Text('${_playbackSpeed}x'),
+                      ),
+                    ),
+                  ],
+                )
+              : CircularProgressIndicator(),
         ],
       ),
     );
